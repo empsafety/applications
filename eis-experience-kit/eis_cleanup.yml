@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- hosts: localhost
+  tasks:
+
+  - name: Load CameraStream vars
+    include_vars: ./roles/camera_stream/build/defaults/main.yml
+
+  - name: Cleanup CameraStream image
+    include_tasks: ./roles/camera_stream/build/tasks/cleanup.yml
+
+  - name: Load EIS build vars
+    include_vars: ./roles/build/defaults/main.yml
+
+  - name: Cleanup EIS image
+    include_tasks: ./roles/build/tasks/cleanup.yml
+
+  - name: load docker variables
+    include_vars: ./roles/docker/defaults/main.yml
+
+  - name: prune docker
+    include_tasks: ./roles/docker/tasks/prune.yml
+
+  - name: uninstall docker
+    include_tasks: ./roles/docker/tasks/uninstall.yml
+
+  - name: remove docker registry client certificate
+    include_tasks: ./roles/harbor_registry/localhost/tasks/cleanup.yml
+
+- hosts: controller_group
+  tasks:
+  - name: Load CameraStream vars
+    include_vars: ./roles/camera_stream/deploy/defaults/main.yml
+
+  - name: Cleanup CameraStream
+    include_tasks: ./roles/camera_stream/deploy/tasks/cleanup.yaml
+
+  - name: Load EIS deploy vars
+    include_vars: ./roles/deploy/defaults/main.yml
+
+  - name: Cleanup EIS deploy
+    include_tasks: ./roles/deploy/tasks/cleanup.yml
+
+  - name: Cleanup EIS Provision
+    include_tasks: ./roles/provision/controlplane/tasks/cleanup.yml

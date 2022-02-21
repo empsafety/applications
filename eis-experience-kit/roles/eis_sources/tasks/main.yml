@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- name: delete if any old eis_repo folder exist
+  file:
+    path: "{{ eis_repo_dir }}"
+    state: absent
+  ignore_errors: yes
+
+- name: create directory if not exist
+  file:
+    path: "{{ eis_repo_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: download repo tool for multi-repo codebase checkout
+  shell: "{{ item }}"
+  with_items:
+    - curl {{ repo_tool }} > repo
+    - mv repo -f /bin/
+    - chmod 755 /bin/repo
+  args:
+    chdir: "{{ eis_repo_dir }}"
+  changed_when: true
+  when: eis_source == "gitclone"
+
+- name: EIS codebase checkout using repo tool
+  shell: "{{ item }}"
+  with_items:
+    - repo init -u "{{ eis_repo_url }}"  -b {{ eis_repo_branch }}
+    - cd .repo/manifests; repo init -m video.xml; repo sync
+  args:
+    chdir: "{{ eis_repo_dir }}"
+  changed_when: true
+  when: eis_source == "gitclone"
+
+- name: EIS code repository from baseline release
+  block:
+    - name: create directory if not exist
+      file:
+        path: "{{ eis_repo_dir }}/IEdgeInsights"
+        state: directory
+        mode: '0755'
+    - name: copy IEdgeInsights directory to the expected location
+      shell: >-
+        cp -rf {{ release_package_path }}/* {{ eis_repo_dir }}/IEdgeInsights/ &&
+        chmod -R  755 {{ eis_repo_dir }}/IEdgeInsights/*
+      changed_when: true
+  when: eis_source == "release"
+
+- name: install python requirements.txt
+  command: "pip3 install -r requirements.txt"
+  args:
+    chdir: "{{ eis_repo_dir }}/IEdgeInsights/build"
+  changed_when: true
+
+- name: install pip3 pyyaml
+  command: "sudo pip3 install pyyaml"
+  changed_when: true
+
+- name: run eis_builder.py
+  command: "python3 eis_builder.py"
+  args:
+    chdir: "{{ eis_repo_dir }}/IEdgeInsights/build"
+  changed_when: true
+
+- name: run generate_eis_bundle.py
+  command: "python3 generate_eis_bundle.py -p"
+  args:
+    chdir: "{{ eis_repo_dir }}/IEdgeInsights/build/deploy"
+  changed_when: true
+

@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+- hosts: localhost
+  roles:
+    - role: machine_setup/localhost
+    - role: docker
+    - role: harbor_registry/localhost
+    - role: provision/localhost
+    - role: common/build
+    - role: build
+    - role: camera_stream/build
+
+- hosts: controller_group
+  roles:
+    - role: machine_setup/k8s_master
+    - role: provision/controlplane
+    - role: camera_stream/deploy
+      when: camera_stream_pod | default(True)
+    - role: deploy

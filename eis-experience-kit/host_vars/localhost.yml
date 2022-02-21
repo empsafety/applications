@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+# Global variables for the host [localhost]
+# Will override local variables from defaults
+
+---
+
+### Proxy settings
+# Setup proxy on the machine - required if the Internet is accessible via proxy
+proxy_os_enable: false
+# Clear previous proxy settings
+proxy_os_remove_old: false
+# Proxy URLs to be used for HTTP, HTTPS and FTP
+proxy_os_http: "http://proxy.example.org:3129"
+proxy_os_https: "http://proxy.example.org:3128"
+proxy_os_ftp: "http://proxy.example.org:3128"
+proxy_os_noproxy: ""
+# Proxy to be used by YUM (/etc/yum.conf)
+proxy_yum_url: ""
+
+### EIS repository configuration
+eis_source: "release"
+release_package_path: "/root/Edge_Insights_for_Industrial_2.4.1/IEdgeInsights/"    # provide release package till IEdgeInsights/ folder"
+
+eis_env_file: "{{ eis_sources_dir }}/build/.env"
+
+os_yum_base_packages: "jq,vim-common,curl,yum-utils,python2-pip,wget,git,python-devel,moreutils"
+
+docker_format_command: !unsafe 'docker images --format "{{.Repository}}:{{.Tag}}"'
+build_eis_base_images: true

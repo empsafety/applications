@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+- name: add Docker repository
+  yum_repository:
+    name: docker
+    description: Docker CE repository
+    baseurl: "{{ docker_repository_url }}"
+    gpgkey: "{{ docker_repository_key }}"
+    gpgcheck: yes
+
+- name: clear yum cache
+  command: yum clean all
+  args:
+    warn: false
+  changed_when: true
+
+- name: install Docker CE
+  yum:
+    name: "{{ docker_packages }}"
+    state: present
+  notify:
+  - enable and start docker service
+
+- name: install docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+  changed_when: true
+
+- name: docker-compose chmod
+  file:
+    path: /usr/local/bin/docker-compose
+    mode: '0755'
+
+- name: set up proxy
+  include_tasks: proxy.yml
+  when: proxy_os_enable|bool
+
+- name: restart services if needed
+  meta: flush_handlers

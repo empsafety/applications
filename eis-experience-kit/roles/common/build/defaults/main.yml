@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2020 Intel Corporation
+
+---
+
+eis_base_images_names: "ia_eisbase ia_common ia_video_common ia_openvino_base"
+
