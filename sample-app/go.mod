@@ -1,4 +1,4 @@
-module github.com/smart-edge-open/edgeapps/applications/sample-app
+module github.com/empsafety/applications/sample-app
 
 go 1.16
 
